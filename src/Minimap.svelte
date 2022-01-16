@@ -22,21 +22,23 @@
             const scaleRatio = minimap.clientWidth / content.clientWidth;
 
             // draw background
-            context.fillStyle = "#CCCCCC";
+            context.fillStyle = "#FFFFFF";
             context.fillRect(0, 0, minimap.width, minimap.height);
 
             const scaleRect = (rect: DOMRect, ratio: number): DOMRect => {
                 return new DOMRect(
-                    (rect.x - 4) * ratio,
-                    (rect.y - 4) * ratio,
-                    (rect.width - 4) * ratio,
-                    (rect.height - 4) * ratio
+                    rect.x * ratio,
+                    rect.y * ratio,
+                    rect.width * ratio,
+                    rect.height * ratio
                 );
             };
 
             const range = document.createRange();
 
             const drawElement = (element: Element) => {
+                if (element.classList.contains("minimap-exclude")) return;
+
                 context.fillStyle = window
                     .getComputedStyle(element)
                     .getPropertyValue("background-color");
@@ -51,46 +53,25 @@
                     bgRect.height
                 );
 
-                range.selectNodeContents(element);
-                let text = range.toString();
-                let endOffset = range.endOffset;
-
-                let strippedText = text.trimEnd();
-                if (!strippedText) return;
-                range.setEnd(
-                    element,
-                    endOffset - (text.length - strippedText.length)
-                );
-
-                text = range.toString();
-                strippedText = text.trimStart();
-                let startOffset = range.startOffset;
-                if (!strippedText) return;
-                range.setStart(
-                    element,
-                    startOffset + (text.length - strippedText.length)
-                );
-                const rect = scaleRect(
-                    range.getBoundingClientRect(),
-                    scaleRatio
-                );
-                // console.log(rect, context.fillStyle);
+                if (element.classList.contains("minimap-exclude-text")) return;
 
                 const textColor = window
                     .getComputedStyle(element)
                     .getPropertyValue("color");
 
                 const parts = textColor.match(/[\d.]+/g);
-
-                // If alpha is not there, add it:
+                // set alpha
                 if (parts.length === 3) {
-                    parts.push("1");
+                    parts.push("0.3");
+                } else {
+                    parts[3] = "0.3";
                 }
-
-                // Modify alpha:
-                parts[3] = "0.3";
                 context.fillStyle = `rgba(${parts.join(",")})`;
-                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+                for (const clientRect of element.getClientRects()) {
+                    const rect = scaleRect(clientRect, scaleRatio);
+                    context.fillRect(rect.x, rect.y, rect.width, rect.height);
+                }
             };
 
             let root = content;
@@ -132,20 +113,22 @@
 </script>
 
 <svelte:window bind:scrollY on:resize="{repaint}" />
-<div class="content" bind:this="{content}">
+<div class="content minimap-exclude" bind:this="{content}">
     <slot />
 </div>
 <canvas class="minimap" bind:this="{minimap}"></canvas>
 
 <style>
     .content {
-        margin-right: 150px;
+        margin-right: 10vw;
     }
     .minimap {
         position: fixed;
         top: 0;
         right: 0;
-        width: 150px;
+        min-width: 40px;
+        max-width: 150px;
+        width: 10vw;
         height: 100%;
         z-index: 100;
     }

@@ -37,25 +37,25 @@
 </script>
 
 <Minimap>
-	<main>
+	<main class="minimap-exclude">
 		<h1>WebTail</h1>
-		<p>
-			<button on:click="{openDialog}">Open file...</button>
-			Filename: {filename || "No file selected!"}
-		</p>
+		<div>
+			<button on:click="{openDialog}" class="minimap-exclude-text">
+				Open file...
+			</button>
+			<span>Filename: {filename || "No file selected!"}</span>
+		</div>
 
 		{#if fileError}
 			<p class="error">{fileError}</p>
 		{:else if lines.length > 0}
 			<h3>Filter: <input bind:value="{filterInput}" /></h3>
-			<div class="lines">
+			<div class="lines minimap-exclude">
 				{#each lines as line}
 					<pre
-						class="line"
+						class="line minimap-exclude-text"
 						class:filtered="{filterRegExp &&
-							filterRegExp.test(line)}">
-						{line}
-						</pre>
+							filterRegExp.test(line)}"><span>{line}</span></pre>
 				{/each}
 			</div>
 		{/if}
