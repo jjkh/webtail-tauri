@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { open } from "@tauri-apps/api/dialog";
 	import { invoke } from "@tauri-apps/api/tauri";
-	import Minimap from "./Minimap.svelte";
+	import FilterScroll from "./FilterScroll.svelte";
 
 	let filterInput: string = undefined;
 	let filterRegExp: RegExp = undefined;
@@ -36,13 +36,11 @@
 	}
 </script>
 
-<Minimap>
-	<main class="minimap-exclude">
+<FilterScroll filterSelector=".filtered">
+	<main>
 		<h1>WebTail</h1>
 		<div>
-			<button on:click="{openDialog}" class="minimap-exclude-text">
-				Open file...
-			</button>
+			<button on:click="{openDialog}"> Open file... </button>
 			<span>Filename: {filename || "No file selected!"}</span>
 		</div>
 
@@ -50,17 +48,19 @@
 			<p class="error">{fileError}</p>
 		{:else if lines.length > 0}
 			<h3>Filter: <input bind:value="{filterInput}" /></h3>
-			<div class="lines minimap-exclude">
+			<div class="lines">
 				{#each lines as line}
 					<pre
-						class="line minimap-exclude-text"
+						class="line"
 						class:filtered="{filterRegExp &&
-							filterRegExp.test(line)}"><span>{line}</span></pre>
+							filterRegExp.test(line)}">{line}</pre>
 				{/each}
 			</div>
+		{:else}
+			<h3>No file selected!</h3>
 		{/if}
 	</main>
-</Minimap>
+</FilterScroll>
 
 <style>
 	:global(body) {
